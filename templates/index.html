@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Image</title>
+</head>
+<body>
+    <h1>Text to Image</h1>
+
+    {% if message %}
+    <ul>
+        <li>{{ message }}</li>
+    </ul>
+    {% endif %}
+
+    <section>
+        <form method="post" action="/text-to-images" enctype="multipart/form-data" target="_blank">
+            <div>
+                <label>
+                    Prompt:<br />
+                    <textarea name="prompt" rows="10" cols="80"></textarea>
+                </label>
+            </div>
+            <div>
+                <label>
+                    NegativePrompt:<br />
+                    <textarea name="negative_prompt" rows="10" cols="80"></textarea>
+                </label>
+            </div>
+            <div>
+                <label>
+                    Num inference steps:<br />
+                    <input type="number" step="1" max="50" min="10" name="num_inference_steps" value="30" />
+                </label>
+            </div>
+            <div>
+                <label>
+                    Guidance scale<br />
+                    <input type="number" step="0.1" max="10" min="1" name="guidance_scale" value="7.0" />
+                </label>
+            </div>
+            <div>
+                <label>
+                    Model<br />
+                    <select name="model">
+                        <option selected>stabilityai/stable-diffusion-xl-base-1.0</option>
+                        <option>stabilityai/stable-diffusion-3-medium-diffusers</option>
+                    </select>
+                </label>
+            </div>
+            <div>
+                <input type="submit" />
+            </div>
+        </form>
+    </section>
+</body>
+</html>

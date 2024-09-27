@@ -1,0 +1,20 @@
+services:
+  t2i:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    env_file:
+      - .env
+    container_name: t2i
+    volumes:
+      - ./tmp:/app/tmp
+    ports:
+      - 8000:8000
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
