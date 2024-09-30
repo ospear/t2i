@@ -36,6 +36,7 @@ WORKDIR /app
 COPY t2i /app/t2i
 COPY main.py /app/main.py
 COPY logging_config.yml /app/logging_config.yml
+RUN mkdir /app/tmp
 
 
 FROM common as development

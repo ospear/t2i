@@ -27,6 +27,9 @@ preload_models:
 .PHONY: build
 build:
 	docker build --target production --tag ospear/t2i:latest --build-arg HUGGING_FACE_HUB_TOKEN=$(HUGGING_FACE_HUB_TOKEN) ./
+.PHONY: build-no-cache
+build-no-cache:
+	docker build --no-cache --target production --tag ospear/t2i:latest --build-arg HUGGING_FACE_HUB_TOKEN=$(HUGGING_FACE_HUB_TOKEN) ./
 
 .PHONY: push
 push:
