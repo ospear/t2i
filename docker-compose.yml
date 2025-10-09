@@ -6,11 +6,13 @@ services:
       target: development
     env_file:
       - .env
+    environment:
+      - PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
     container_name: t2i
     volumes:
       - ./tmp:/app/tmp
     ports:
-      - 8000:8000
+      - 8100:8000
     deploy:
       resources:
         reservations:

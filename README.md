@@ -1,6 +1,7 @@
 # Text to Image Sample App
 
-FastAPIベースのテキストから画像を生成するアプリケーション。Stable Diffusion XL (SDXL)を使用して、プロンプトから画像を生成します。
+FastAPIベースのテキストから画像を生成するアプリケーション。
+Stable Diffusion を使用して、プロンプトから画像を生成します。
 
 ## 特徴
 

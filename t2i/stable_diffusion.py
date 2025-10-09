@@ -25,7 +25,6 @@ class StableDiffusionGenerator:
                     model_path,
                     torch_dtype=torch.float16,
                     use_safetensors=True,
-                    variant="fp16",
                 )
 
             self.authorizer.login()
@@ -33,14 +32,16 @@ class StableDiffusionGenerator:
                 model,
                 torch_dtype=torch.float16,
                 use_safetensors=True,
-                variant="fp16",
             )
             pipe.save_pretrained(model_path)
             return pipe
 
         elif model == SD3_MEDIUM:
             if os.path.exists(model_path):
-                return StableDiffusion3Pipeline.from_pretrained(model_path)
+                return StableDiffusion3Pipeline.from_pretrained(
+                    model_path,
+                    torch_dtype=torch.float16,
+                )
 
             self.authorizer.login()
             pipe = StableDiffusion3Pipeline.from_pretrained(
@@ -57,6 +58,7 @@ class StableDiffusionGenerator:
 
         pipe = self.preload_model(model=item.model)
         pipe = pipe.to("cuda")
+        pipe.enable_attention_slicing()
         image = pipe(
             item.prompt,
             negative_prompt=item.negative_prompt,

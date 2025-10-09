@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "accelerate>=0.34.2",
-    "diffusers>=0.30.2",
+    "diffusers>=0.30.2,<0.31.0",
     "fastapi>=0.112.2",
     "fire>=0.6.0",
     "jinja2>=3.1.4",
@@ -17,17 +17,14 @@ dependencies = [
     "python-multipart>=0.0.10",
     "requests>=2.32.3",
     "sentencepiece>=0.2.0",
-    "torch==2.1.0",
-    "transformers>=4.46.0.dev0",
+    "torch==2.5.0",
+    "transformers>=4.44.0,<4.46.0",
     "uuid6>=2024.7.10",
     "uvicorn>=0.30.6",
 ]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "pyright>=1.1.380",
     "ruff>=0.6.3",
 ]
-
-[tool.uv.sources]
-transformers = { git = "https://github.com/huggingface/transformers.git" }
