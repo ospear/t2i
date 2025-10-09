@@ -8,9 +8,14 @@ Stable Diffusion を使用して、プロンプトから画像を生成します
 - FastAPIによるWebインターフェース
 - 複数のStable Diffusionモデルに対応
   - Stable Diffusion XL 1.0 (SDXL1)
-    - GPU12GB環境下で動作確認済
+    - GPU 12GB環境下で動作確認済
   - Stable Diffusion 3 Medium (SD3)
-    - GPUメモリ不足で動作確認できず
+    - GPU 12GB以上推奨
+- メモリ最適化機能
+  - CPU offloading (モデルの一部をCPUメモリに配置)
+  - Attention slicing (アテンション機構のメモリ効率化)
+  - VAE slicing (VAEのメモリ最適化)
+  - 自動ガベージコレクション
 - Docker/Docker Composeによるコンテナ化
 - NVIDIA GPU対応
 - uvによる高速な依存関係管理
@@ -19,6 +24,8 @@ Stable Diffusion を使用して、プロンプトから画像を生成します
 
 - Python 3.10以上
 - NVIDIA GPU (CUDA 12.2対応)
+  - 推奨: 12GB以上のVRAM
+  - 最小: 8GB VRAM (CPU offloading使用時)
 - Docker & Docker Compose (コンテナ実行の場合)
 - Hugging Face アカウントとAPIトークン
 
@@ -35,8 +42,14 @@ cp .env.sample .env
 `.env`ファイルを編集:
 ```
 HUGGING_FACE_HUB_TOKEN=hf_yourtoken
-PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
+PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512,expandable_segments:True
 ```
+
+環境変数の説明:
+- `HUGGING_FACE_HUB_TOKEN`: Hugging Face APIトークン (必須)
+- `PYTORCH_CUDA_ALLOC_CONF`: CUDAメモリアロケーション設定
+  - `max_split_size_mb:512`: メモリ割り当ての最大サイズを512MBに制限
+  - `expandable_segments:True`: メモリ断片化を回避
 
 ### ローカル開発
 
@@ -71,8 +84,9 @@ make run
 Docker Composeで起動:
 
 ```bash
-docker-compose up
+docker-compose up -d
 ```
+アプリケーションは `http://localhost:8100` でアクセス可能です。
 
 ## 利用可能なコマンド
 
@@ -136,6 +150,38 @@ Webインターフェースを表示
 - **パッケージ管理**: uv
 - **コンテナ**: Docker (CUDA 12.2 runtime)
 - **コード品質**: Ruff, Pyright
+
+## パフォーマンス最適化
+
+このアプリケーションは、限られたGPUメモリでも動作するように、以下の最適化を実装しています：
+
+### メモリ最適化
+
+1. **CPU Offloading**
+   - モデルの各コンポーネントを必要に応じてGPUとCPU間で移動
+   - `enable_model_cpu_offload()` または `enable_sequential_cpu_offload()` を使用
+   - GPUメモリ使用量を大幅に削減
+
+2. **Attention Slicing**
+   - アテンション機構を小さなバッチに分割して処理
+   - `enable_attention_slicing(1)` で最大レベルの最適化を実行
+   - メモリ使用量を削減しつつ品質を維持
+
+3. **VAE Slicing**
+   - VAE（Variational Autoencoder）の処理を最適化
+   - `enable_vae_slicing()` で有効化
+   - 画像のエンコード/デコード時のメモリ消費を削減
+
+4. **自動メモリ管理**
+   - 画像生成前後にCUDAキャッシュをクリア
+   - Python のガベージコレクションを明示的に実行
+   - メモリリークを防止
+
+### 推奨設定
+
+- **SDXL1モデル**: 8-12GB VRAM
+- **SD3 Mediumモデル**: 12GB以上のVRAM推奨
+- CPU offloadingを使用することで、より少ないVRAMでも動作可能
 
 ## ライセンス
 
