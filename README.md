@@ -8,7 +8,9 @@ Stable Diffusion を使用して、プロンプトから画像を生成します
 - FastAPIによるWebインターフェース
 - 複数のStable Diffusionモデルに対応
   - Stable Diffusion XL 1.0 (SDXL1)
+    - GPU12GB環境下で動作確認済
   - Stable Diffusion 3 Medium (SD3)
+    - GPUメモリ不足で動作確認できず
 - Docker/Docker Composeによるコンテナ化
 - NVIDIA GPU対応
 - uvによる高速な依存関係管理

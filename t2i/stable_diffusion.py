@@ -19,19 +19,25 @@ class StableDiffusionGenerator:
             ).resolve()
         )
 
+        # Common optimization parameters for memory efficiency
+        common_kwargs = {
+            "torch_dtype": torch.float16,
+            "low_cpu_mem_usage": True,  # Reduce CPU memory during loading
+        }
+
         if model == SDXL1:
             if os.path.exists(model_path):
                 return DiffusionPipeline.from_pretrained(
                     model_path,
-                    torch_dtype=torch.float16,
                     use_safetensors=True,
+                    **common_kwargs
                 )
 
             self.authorizer.login()
             pipe = DiffusionPipeline.from_pretrained(
                 model,
-                torch_dtype=torch.float16,
                 use_safetensors=True,
+                **common_kwargs
             )
             pipe.save_pretrained(model_path)
             return pipe
@@ -40,13 +46,13 @@ class StableDiffusionGenerator:
             if os.path.exists(model_path):
                 return StableDiffusion3Pipeline.from_pretrained(
                     model_path,
-                    torch_dtype=torch.float16,
+                    **common_kwargs
                 )
 
             self.authorizer.login()
             pipe = StableDiffusion3Pipeline.from_pretrained(
                 "stabilityai/stable-diffusion-3-medium-diffusers",
-                torch_dtype=torch.float16,
+                **common_kwargs
             )
             pipe.save_pretrained(model_path)
             return pipe
@@ -54,11 +60,28 @@ class StableDiffusionGenerator:
         raise ValueError(f"Unknown model {model}")
 
     def generate(self, item: TextToImageItem):
+        # Clear CUDA cache and set memory allocation configuration
+        torch.cuda.empty_cache()
+        torch.cuda.reset_peak_memory_stats()
+
+        # Load model with CPU offloading
+        pipe = self.preload_model(model=item.model)
+
+        # Enable multiple memory optimization strategies
+        pipe.enable_attention_slicing(1)  # Maximum slicing
+        pipe.enable_vae_slicing()  # VAE slicing for memory efficiency
+
+        # Enable CPU offloading for model components
+        if hasattr(pipe, 'enable_model_cpu_offload'):
+            pipe.enable_model_cpu_offload()
+        else:
+            # Fallback to sequential CPU offload
+            pipe.enable_sequential_cpu_offload()
+
+        # Clear cache before inference
         torch.cuda.empty_cache()
 
-        pipe = self.preload_model(model=item.model)
-        pipe = pipe.to("cuda")
-        pipe.enable_attention_slicing()
+        # Generate image with reduced memory footprint
         image = pipe(
             item.prompt,
             negative_prompt=item.negative_prompt,
@@ -71,7 +94,12 @@ class StableDiffusionGenerator:
         ).resolve()
         image.save(path)
 
+        # Cleanup
         del image, pipe
         torch.cuda.empty_cache()
+
+        # Force garbage collection
+        import gc
+        gc.collect()
 
         return path
