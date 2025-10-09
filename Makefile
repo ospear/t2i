@@ -2,11 +2,13 @@ include .env
 
 .PHONY: lint
 lint:
+	uv run ruff format --check .
 	uv run ruff check .
 
 .PHONY: fmt
 fmt:
 	uv run ruff format .
+	uv run ruff check --fix .
 
 .PHONY: vet
 vet:

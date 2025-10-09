@@ -1,6 +1,6 @@
 from t2i.controller import TextToImageController
 from t2i.logger import setup_logger
-from t2i.text_to_image_item import TextToImageItem, SDXL1, SD3_MEDIUM
+from t2i.text_to_image_item import TextToImageItem, SDXL1
 
 
 class Commands:
